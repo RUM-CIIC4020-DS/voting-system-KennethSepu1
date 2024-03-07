@@ -8,19 +8,13 @@ public class Election {
     private int totalValidBallots;
 
     public Election() {
-        // Implement logic to read candidates.csv and ballots.csv[^5^][5]
-        // Initialize candidates array
-        // Count totalBallots, totalInvalidBallots, totalBlankBallots, totalValidBallots
+      
     }
 
     public Election(String candidates_filename, String ballot_filename) {
-        // Implement logic to read specified candidate and ballot files[^5^][5]
-        // Initialize candidates array
-        // Count totalBallots, totalInvalidBallots, totalBlankBallots, totalValidBallots
     }
 
     public String getWinner() {
-        // Implement logic to determine the winner
         return "";
     }
 
@@ -41,7 +35,6 @@ public class Election {
     }
 
     public String[] getEliminatedCandidates() {
-        // Implement logic to get list of eliminated candidates
         return new String[0];
     }
 
