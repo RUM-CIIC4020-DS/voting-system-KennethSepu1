@@ -3,13 +3,13 @@ package main;
 public class Candidate {
     private int id;
     private String name;
-    private boolean active;
+    boolean active;
 
     public Candidate(String line) {
         String[] parts = line.split(",");
         this.id = Integer.parseInt(parts[0]);
         this.name = parts[1];
-        this.active = true;
+        this.active=true;
     }
 
     public int getId() {
@@ -25,7 +25,13 @@ public class Candidate {
     }
 
     public void deactivate() {
-        this.active = false;
+        this.active =false;
     }
+
+	public void setActive(boolean isActive) {
+		this.active = isActive;
+		
+	}
+    
 }
 

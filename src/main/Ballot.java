@@ -1,63 +1,83 @@
 package main;
 
-import java.util.ArrayList;
-import java.util.List;
+import data_structures.SinglyLinkedList;
+import interfaces.List;
 
 public class Ballot {
     private int ballotNum;
-    private List<Integer> votes; 
+    private List<Integer> candidateIDs;
+    private List<Integer> rankings;
     private int ballotType;
 
-    public Ballot(String line, interfaces.List<Candidate> candidates) {
-    	 	
-    		this.ballotType = 0;
-            boolean[] checkedRanks = new boolean[candidates.size()];
-            String[] parts = line.split(",");
-            this.ballotNum = Integer.parseInt(parts[0]);
-            this.votes = new ArrayList<>();
-            
-            for (int i = 1; i <= candidates.size(); i++) {
-                this.votes.add(0); 
-            }
-            for (int i = 1; i < parts.length; i++) {
-                String[] pair = parts[i].split(":");
-                int candidateID = Integer.parseInt(pair[0]);
-                int rank = Integer.parseInt(pair[1]);
-                if (rank > candidates.size() || this.votes.get(rank - 1) != 0) {
-                    this.ballotType = 2; 
-                    break;
-                } else {
-                    this.votes.set(rank - 1, candidateID);
-                }
-            }
-            if (this.ballotType != 2) {
-                boolean zero = true;
-                for (int vote : this.votes) {
-                    if (vote != 0) {
-                        zero = false;
-                        break;
-                    }
-                }
-                if (zero) {
-                    this.ballotType = 1;
-                } else {
-                    this.ballotType = 0;
-                }
-                
-                for (int rank : votes) {
-                    if (rank > candidates.size() || checkedRanks[rank - 1]) {
-                        this.ballotType = 2;
-                        break;
-                    }
-                    checkedRanks[rank - 1] = true;
-                }
-                for (int i = 0; i < checkedRanks.length; i++) {
-                    if (!checkedRanks[i] && i < votes.size()) {
-                        this.ballotType = 2; 
-                        break;
-                }
-            }
+    public Ballot(String line, List<Candidate> candidates) {
+        String[] partsplit = line.split(",");
+        this.ballotNum = Integer.parseInt(partsplit[0]);
+        this.candidateIDs = new SinglyLinkedList<>();
+        this.rankings = new SinglyLinkedList<>();
+        int maxRank = 0;
+
+        if (partsplit.length == 1) {
+            this.ballotType = 1;
+            return;
         }
+
+        int i = 1;
+        while (i < partsplit.length) {
+            String[] pair = partsplit[i].split(":");
+            int candidateID = Integer.parseInt(pair[0]);
+            int rank = Integer.parseInt(pair[1]);
+
+            if (rank < 1) {
+                this.ballotType = 2;
+                return;
+            }
+
+            if (rank > candidates.size()) {
+                this.ballotType = 2;
+                return;
+            }
+
+            if (rankings.contains(rank)) {
+                this.ballotType = 2;
+                return;
+            }
+
+            if (candidateIDs.contains(candidateID)) {
+                this.ballotType = 2;
+                return;
+            }
+
+            candidateIDs.add(candidateID);
+            rankings.add(rank);
+
+            if (rank > maxRank) {
+                maxRank = rank;
+            }
+
+            i++;
+        }
+
+        if (maxRank != rankings.size()) {
+            this.ballotType = 2;
+            return;
+        }
+
+        if (this.candidateIDs.isEmpty()) {
+            this.ballotType = 1;
+        } else {
+            this.ballotType = 0;
+        }
+    }
+
+    private int getIndexOf(List<Integer> list, int value) {
+        int index = 0;
+        while (index < list.size()) {
+            if (list.get(index) == value) {
+                return index;
+            }
+            index++;
+        }
+        return -1;
     }
 
     public int getBallotNum() {
@@ -65,28 +85,45 @@ public class Ballot {
     }
 
     public int getRankByCandidate(int candidateID) {
-        return this.votes.indexOf(candidateID) + 1;
-    }
-    public int getCandidateByRank(int rank) {
-        return this.votes.get(rank - 1); 
-    }
-
-    public boolean eliminate(int candidateId) {
-        int index = votes.indexOf(candidateId);
-        if (index != -1) {
-            votes.set(index, -1); 
-            for (int i = 0; i < votes.size(); i++) {
-                if (votes.get(i) > candidateId) {
-                    votes.set(i, votes.get(i) - 1);
+        for (int i = 0; i < candidateIDs.size(); i++) {
+            if (candidateIDs.get(i) == candidateID) {
+                if (i < rankings.size()) { // Check if index is within bounds
+                    return rankings.get(i);
+                } else {
+                    // Handle the case where the index is out of bounds
+                    return -1; // or throw an exception or handle the case appropriately
                 }
             }
+        }
+        return -1;
+    }
+
+    public int getCandidateByRank(int rank) {
+        if (rank > 0 && rank <= rankings.size()) {
+            if (rank - 1 < candidateIDs.size()) { // Check if index is within bounds
+                return candidateIDs.get(rank - 1);
+            } else {
+                // Handle the case where the index is out of bounds
+                return -1; // or throw an exception or handle the case appropriately
+            }
+        }
+        return -1;
+    }
+    
+    public boolean eliminate(int eliminatedCandidateId) {
+        int index = getIndexOf(candidateIDs, eliminatedCandidateId);
+        if (index != -1) {
+            if (index < rankings.size()) {
+                rankings.remove(index);
+            }
+            candidateIDs.remove(index);
             return true;
         }
         return false;
     }
 
+
     public int getBallotType() {
         return this.ballotType;
     }
 }
-
