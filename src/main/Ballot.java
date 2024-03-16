@@ -1,5 +1,6 @@
 package main;
 
+import data_structures.ArrayList;
 import data_structures.SinglyLinkedList;
 import interfaces.List;
 
@@ -7,14 +8,23 @@ public class Ballot {
     private int ballotNum;
     private List<Integer> candidateIDs;
     private List<Integer> rankings;
+    private List<List<Ballot>> listoflist;
     private int ballotType;
 
     public Ballot(String line, List<Candidate> candidates) {
         String[] partsplit = line.split(",");
         this.ballotNum = Integer.parseInt(partsplit[0]);
+        this.listoflist = new ArrayList<>(candidates.size());
         this.candidateIDs = new SinglyLinkedList<>();
         this.rankings = new SinglyLinkedList<>();
         int maxRank = 0;
+        
+        int x = 0;
+        while (x < candidates.size()) {
+            this.listoflist.add(new ArrayList<>());
+            x++;
+        }
+
 
         if (partsplit.length == 1) {
             this.ballotType = 1;
@@ -68,7 +78,7 @@ public class Ballot {
             this.ballotType = 0;
         }
     }
-
+    
     private int getIndexOf(List<Integer> list, int value) {
         int index = 0;
         while (index < list.size()) {
@@ -87,11 +97,11 @@ public class Ballot {
     public int getRankByCandidate(int candidateID) {
         for (int i = 0; i < candidateIDs.size(); i++) {
             if (candidateIDs.get(i) == candidateID) {
-                if (i < rankings.size()) { // Check if index is within bounds
+                if (i < rankings.size()) { 
                     return rankings.get(i);
                 } else {
-                    // Handle the case where the index is out of bounds
-                    return -1; // or throw an exception or handle the case appropriately
+                  
+                    return -1; 
                 }
             }
         }
@@ -100,11 +110,11 @@ public class Ballot {
 
     public int getCandidateByRank(int rank) {
         if (rank > 0 && rank <= rankings.size()) {
-            if (rank - 1 < candidateIDs.size()) { // Check if index is within bounds
+            if (rank - 1 < candidateIDs.size()) { 
                 return candidateIDs.get(rank - 1);
             } else {
-                // Handle the case where the index is out of bounds
-                return -1; // or throw an exception or handle the case appropriately
+               
+                return -1;
             }
         }
         return -1;
@@ -126,4 +136,11 @@ public class Ballot {
     public int getBallotType() {
         return this.ballotType;
     }
+    public boolean	matchesBestCandidate(int candidateId) {
+        if (candidateIDs.isEmpty()) {
+            return false;
+        }
+        return candidateIDs.get(0) == candidateId;
+    }
+
 }
